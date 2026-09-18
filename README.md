@@ -40,6 +40,5 @@ During evaluation, the student must demonstrate the working project 'Serverless 
 *Important:* This is an individual project. You may refer to documentation and learning resources, but you must understand your complete implementation and be ready for individual viva and live modification.
 
 ------
-Regards,
-Faculty
-Cloud Application and Development
+
+#### Cloud Application and Development
