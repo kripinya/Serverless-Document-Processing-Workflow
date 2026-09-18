@@ -35,8 +35,11 @@ During evaluation, the student must demonstrate the working project 'Serverless 
 - Prepare a clear cloud architecture diagram.
 - Submit source code and a Git repository with at least 8 meaningful commits.
 - Submit API documentation, screenshots, performance results, failure experiment and final report.
-Attend individual viva and be ready for a live modification.
-Important: This is an individual project. You may refer to documentation and learning resources, but you must understand your complete implementation and be ready for individual viva and live modification.
+- Attend individual viva and be ready for a live modification.
+
+*Important:* This is an individual project. You may refer to documentation and learning resources, but you must understand your complete implementation and be ready for individual viva and live modification.
+
+------
 Regards,
 Faculty
 Cloud Application and Development
