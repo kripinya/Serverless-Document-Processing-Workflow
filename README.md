@@ -74,7 +74,7 @@ Serverless-Document-Processing-Workflow/
 ├── infrastructure/             # CloudFormation template
 │   └── cloudformation-template.yml
 ├── docs/                       # Documentation
-│   ├── API.md                  # REST API documentation (11 endpoints)
+│   ├── API.md                  # REST API documentation (13 endpoints)
 │   └── ARCHITECTURE.md         # Cloud architecture & design decisions
 ├── package.json                # Root orchestration scripts
 ├── .gitignore
@@ -143,21 +143,21 @@ aws cloudformation deploy \
 
 ---
 
-## API Endpoints (11 total, ≥5 required)
+## API Endpoints (13 total, ≥5 required)
 
 | # | Method | Endpoint | Auth | Description |
 |---|--------|----------|------|-------------|
 | 1 | POST | `/api/auth/register` | Public | Register user |
 | 2 | POST | `/api/auth/login` | Public | Login & get JWT |
-| 3 | GET | `/api/auth/me` | - | Get profile |
-| 4 | POST | `/api/documents/upload` | - | Upload document |
-| 5 | GET | `/api/documents` | - | List documents |
-| 6 | GET | `/api/documents/:id` | - | Document details |
-| 7 | GET | `/api/documents/:id/download` | - | Pre-signed URL |
-| 8 | DELETE | `/api/documents/:id` | - | Delete document |
-| 9 | GET | `/api/processing/status/:id` | - | Processing status |
-| 10 | POST | `/api/processing/retry/:id` | - | Manual retry |
-| 11 | GET | `/api/processing/events/:id` | - | Event audit log |
+| 3 | GET | `/api/auth/me` | JWT (Bearer) | Get profile |
+| 4 | POST | `/api/documents/upload` | JWT (Bearer) | Upload document |
+| 5 | GET | `/api/documents` | JWT (Bearer) | List documents |
+| 6 | GET | `/api/documents/:id` | JWT (Bearer) | Document details |
+| 7 | GET | `/api/documents/:id/download` | JWT (Bearer) | Pre-signed URL |
+| 8 | DELETE | `/api/documents/:id` | JWT (Bearer) | Delete document |
+| 9 | GET | `/api/processing/status/:id` | JWT (Bearer) | Processing status |
+| 10 | POST | `/api/processing/retry/:id` | JWT (Bearer) | Manual retry |
+| 11 | GET | `/api/processing/events/:id` | JWT (Bearer) | Event audit log |
 | 12 | GET | `/api/health` | Public | Health check |
 | 13 | GET | `/api/health/metrics` | Public | Aggregated metrics |
 
@@ -174,13 +174,18 @@ UPLOADED → VALIDATING → PROCESSING → CLASSIFIED → COMPLETED
                 ↓                                      
      SQS Retry (up to 3x)                             
                 ↓                                      
-         Dead Letter Queue → SNS Alert → FAILED        
+          Dead Letter Queue → SNS Alert → FAILED        
 ```
 
 - **Each document = independent SQS message** → one failure never blocks others
 - **Controlled failure scenario:** Files named `corrupt*` trigger intentional validation failure
 - **Retry with exponential backoff:** Up to 3 retries before DLQ routing
 - **Immutable event audit trail:** All state transitions logged in `EventHistoryTable`
+
+### Document Classification Mechanism
+- **Method:** Rule-based keyword-heuristic classifier (`processingService.js`).
+- **How it works:** Extracted text is normalized and matched against domain-specific keyword dictionaries (`INVOICE`, `RECEIPT`, `REPORT`, `RESUME`, `CONTRACT`, `LETTER`). The category with the highest frequency match is assigned to the document in DynamoDB. Unmatched documents default to `GENERAL`.
+- **Extensibility:** Dictionary rules in `CLASSIFICATION_RULES` can be customized or replaced with ML models (e.g. AWS Comprehend or Textract) without changing pipeline architecture.
 
 ---
 
@@ -193,26 +198,26 @@ UPLOADED → VALIDATING → PROCESSING → CLASSIFIED → COMPLETED
 
 ## Requirements Checklist
 
-| # | Requirement |
-|---|---|---|
-| 1 | Core functionality (validate, process, classify, store) |
-| 2 | ≥5 REST API endpoints |
-| 3 | Proper data model |
-| 4 | Authentication (JWT) |
-| 5 | Cloud deployment ready |
-| 6 | Logging |
-| 7 | ≥2 metrics |
-| 8 | Load testing (3 levels) |
-| 9 | Cloud architecture diagram |
-| 10 | API documentation |
-| 11 | Event-driven architecture |
-| 12 | Async processing (SQS → Lambda) |
-| 13 | Handle duplicates/failures/delays |
-| 14 | Event history maintained |
-| 15 | One failure ≠ block system |
-| 16 | ≥3 cloud components |
-| 17 | Controlled failure scenario |
-| 18 | ≥8 Git commits |
+| # | Requirement | Status | Implementation Details |
+|---|-------------|:------:|------------------------|
+| 1 | Core functionality (validate, process, classify, store) | ✅ | Multi-stage pipeline implemented in `processingService.js` |
+| 2 | ≥5 REST API endpoints | ✅ | 13 endpoints implemented across Auth, Documents, Processing, Health |
+| 3 | Proper data model | ✅ | DynamoDB models for Document, EventHistory, User (`src/models/`) |
+| 4 | Authentication (JWT) | ✅ | Bearer token auth verification via `authMiddleware.js` |
+| 5 | Cloud deployment ready | ✅ | Serverless Framework (`serverless.yml`) + CloudFormation IaC |
+| 6 | Logging | ✅ | Structured console logging streamed to AWS CloudWatch |
+| 7 | ≥2 metrics | ✅ | Pipeline latency (`ProcessingDuration`) & Classification distribution |
+| 8 | Load testing (3 levels) | ✅ | Artillery suites for Low, Medium, High & combined multi-phase load |
+| 9 | Cloud architecture diagram | ✅ | Architecture diagram in README and `docs/ARCHITECTURE.md` |
+| 10 | API documentation | ✅ | Complete OpenAPI-style documentation in `docs/API.md` |
+| 11 | Event-driven architecture | ✅ | Asynchronous decoupling via SQS FIFO queue & DLQ |
+| 12 | Async processing (SQS → Lambda) | ✅ | Background SQS processor Lambda (`sqsProcessor.js`) |
+| 13 | Handle duplicates/failures/delays | ✅ | SQS FIFO deduplication, visibility timeouts & exponential backoff |
+| 14 | Event history maintained | ✅ | Immutable audit trail in DynamoDB `EventHistoryTable` |
+| 15 | One failure ≠ block system | ✅ | Independent SQS message isolation; one failure never blocks others |
+| 16 | ≥3 cloud components | ✅ | 7 AWS services: S3, DynamoDB, SQS, DLQ, Lambda, API Gateway, CloudWatch/SNS |
+| 17 | Controlled failure scenario | ✅ | Files named `corrupt*` trigger intentional validation failure |
+| 18 | ≥8 Git commits | ✅ | 11 clean, structured commits in Git history |
 
 ---
 
