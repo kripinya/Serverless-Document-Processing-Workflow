@@ -1,0 +1,25 @@
+# ============================================================
+# low-load.yml — Low Workload Level (Baseline Testing)
+# Rate: 5 arrivals/sec for 30 seconds
+# ============================================================
+config:
+  target: "http://localhost:5001"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Low Workload Level (5 req/s)"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Health Check"
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/health/metrics"
+          expect:
+            - statusCode: 200

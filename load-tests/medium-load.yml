@@ -1,0 +1,25 @@
+# ============================================================
+# medium-load.yml — Medium Workload Level (Moderate Concurrency)
+# Rate: 20 arrivals/sec for 30 seconds
+# ============================================================
+config:
+  target: "http://localhost:5001"
+  phases:
+    - duration: 30
+      arrivalRate: 20
+      name: "Medium Workload Level (20 req/s)"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Document Workflow Inspection"
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/health/metrics"
+          expect:
+            - statusCode: 200

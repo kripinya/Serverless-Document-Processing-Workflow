@@ -1,0 +1,56 @@
+# ============================================================
+# load-test.yml — Combined Artillery Load Test Configuration
+# Tests multi-tier workload levels: Low -> Medium -> High
+# ============================================================
+config:
+  target: "http://localhost:5001"
+  phases:
+    # ─── Low Workload Level: 5 requests/sec for 30s ───
+    - duration: 30
+      arrivalRate: 5
+      name: "Phase 1: Low Load (5 req/s)"
+
+    # ─── Medium Workload Level: 20 requests/sec for 30s ───
+    - duration: 30
+      arrivalRate: 20
+      name: "Phase 2: Medium Load (20 req/s)"
+
+    # ─── High Workload Level: 50 requests/sec for 30s ───
+    - duration: 30
+      arrivalRate: 50
+      name: "Phase 3: High Load (50 req/s)"
+
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Health & Telemetry Checks"
+    weight: 4
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/health/metrics"
+          expect:
+            - statusCode: 200
+
+  - name: "User Authentication & Listing Documents"
+    weight: 6
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "demo@example.com"
+            password: "Password123!"
+          capture:
+            - json: "$.data.token"
+              as: "token"
+      - get:
+          url: "/api/documents"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200

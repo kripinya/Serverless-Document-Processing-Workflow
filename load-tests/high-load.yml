@@ -1,0 +1,25 @@
+# ============================================================
+# high-load.yml — High Workload Level (Stress & Scalability Testing)
+# Rate: 50 arrivals/sec for 30 seconds
+# ============================================================
+config:
+  target: "http://localhost:5001"
+  phases:
+    - duration: 30
+      arrivalRate: 50
+      name: "High Workload Level (50 req/s)"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "High Traffic Ingestion"
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/health/metrics"
+          expect:
+            - statusCode: 200
