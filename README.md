@@ -200,24 +200,24 @@ UPLOADED → VALIDATING → PROCESSING → CLASSIFIED → COMPLETED
 
 | # | Requirement | Status | Implementation Details |
 |---|-------------|:------:|------------------------|
-| 1 | Core functionality (validate, process, classify, store) | ✅ | Multi-stage pipeline implemented in `processingService.js` |
-| 2 | ≥5 REST API endpoints | ✅ | 13 endpoints implemented across Auth, Documents, Processing, Health |
-| 3 | Proper data model | ✅ | DynamoDB models for Document, EventHistory, User (`src/models/`) |
-| 4 | Authentication (JWT) | ✅ | Bearer token auth verification via `authMiddleware.js` |
-| 5 | Cloud deployment ready | ✅ | Serverless Framework (`serverless.yml`) + CloudFormation IaC |
-| 6 | Logging | ✅ | Structured console logging streamed to AWS CloudWatch |
-| 7 | ≥2 metrics | ✅ | Pipeline latency (`ProcessingDuration`) & Classification distribution |
-| 8 | Load testing (3 levels) | ✅ | Artillery suites for Low, Medium, High & combined multi-phase load |
-| 9 | Cloud architecture diagram | ✅ | Architecture diagram in README and `docs/ARCHITECTURE.md` |
-| 10 | API documentation | ✅ | Complete OpenAPI-style documentation in `docs/API.md` |
-| 11 | Event-driven architecture | ✅ | Asynchronous decoupling via SQS FIFO queue & DLQ |
-| 12 | Async processing (SQS → Lambda) | ✅ | Background SQS processor Lambda (`sqsProcessor.js`) |
-| 13 | Handle duplicates/failures/delays | ✅ | SQS FIFO deduplication, visibility timeouts & exponential backoff |
-| 14 | Event history maintained | ✅ | Immutable audit trail in DynamoDB `EventHistoryTable` |
-| 15 | One failure ≠ block system | ✅ | Independent SQS message isolation; one failure never blocks others |
-| 16 | ≥3 cloud components | ✅ | 7 AWS services: S3, DynamoDB, SQS, DLQ, Lambda, API Gateway, CloudWatch/SNS |
-| 17 | Controlled failure scenario | ✅ | Files named `corrupt*` trigger intentional validation failure |
-| 18 | ≥8 Git commits | ✅ | 11 clean, structured commits in Git history |
+| 1 | Core functionality (validate, process, classify, store) | Completed | Multi-stage pipeline implemented in `processingService.js` |
+| 2 | ≥5 REST API endpoints | Completed | 13 endpoints implemented across Auth, Documents, Processing, Health |
+| 3 | Proper data model | Completed | DynamoDB models for Document, EventHistory, User (`src/models/`) |
+| 4 | Authentication (JWT) | Completed | Bearer token auth verification via `authMiddleware.js` |
+| 5 | Cloud deployment ready | Completed | Serverless Framework (`serverless.yml`) + CloudFormation IaC |
+| 6 | Logging | Completed | Structured console logging streamed to AWS CloudWatch |
+| 7 | ≥2 metrics | Completed | Pipeline latency (`ProcessingDuration`) & Classification distribution |
+| 8 | Load testing (3 levels) | Completed | Artillery suites for Low, Medium, High & combined multi-phase load |
+| 9 | Cloud architecture diagram | Completed | Architecture diagram in README and `docs/ARCHITECTURE.md` |
+| 10 | API documentation | Completed | Complete OpenAPI-style documentation in `docs/API.md` |
+| 11 | Event-driven architecture | Completed | Asynchronous decoupling via SQS FIFO queue & DLQ |
+| 12 | Async processing (SQS → Lambda) | Completed | Background SQS processor Lambda (`sqsProcessor.js`) |
+| 13 | Handle duplicates/failures/delays | Completed | SQS FIFO deduplication, visibility timeouts & exponential backoff |
+| 14 | Event history maintained | Completed | Immutable audit trail in DynamoDB `EventHistoryTable` |
+| 15 | One failure ≠ block system | Completed | Independent SQS message isolation; one failure never blocks others |
+| 16 | ≥3 cloud components | Completed | 7 AWS services: S3, DynamoDB, SQS, DLQ, Lambda, API Gateway, CloudWatch/SNS |
+| 17 | Controlled failure scenario | Completed | Files named `corrupt*` trigger intentional validation failure |
+| 18 | ≥8 Git commits | Completed | 11 clean, structured commits in Git history |
 
 ---
 
