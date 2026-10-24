@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation Stack for Serverless Document Processing Workflow'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    Description: Environment stage (dev, staging, prod)
+
+Resources:
+  # ─── S3 Storage Bucket ───
+  DocumentStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'doc-processing-${AWS::AccountId}-${EnvironmentName}'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD']
+            AllowedOrigins: ['*']
+            MaxAge: 3000
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ─── DynamoDB: Documents Table ───
+  DocumentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'DocumentsTable-${EnvironmentName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # ─── DynamoDB: Event History Table ───
+  EventHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'EventHistoryTable-${EnvironmentName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: documentId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: documentId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
+  # ─── DynamoDB: Users Table ───
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'UsersTable-${EnvironmentName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+
+  # ─── SQS Dead Letter Queue (DLQ) ───
+  DocumentProcessingDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'doc-processing-dlq-${EnvironmentName}'
+      MessageRetentionPeriod: 1209600 # 14 days
+
+  # ─── SQS Processing Queue with DLQ Redrive ───
+  DocumentProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'doc-processing-queue-${EnvironmentName}'
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DocumentProcessingDLQ.Arn
+        maxReceiveCount: 3
+
+  # ─── SNS Topic for Failure Alerts ───
+  ProcessingAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'doc-processing-alerts-${EnvironmentName}'
+
+Outputs:
+  StorageBucketName:
+    Description: S3 Bucket Name
+    Value: !Ref DocumentStorageBucket
+
+  DocumentsTableName:
+    Description: DynamoDB Documents Table
+    Value: !Ref DocumentsTable
+
+  EventHistoryTableName:
+    Description: DynamoDB Event History Table
+    Value: !Ref EventHistoryTable
+
+  QueueUrl:
+    Description: SQS Processing Queue URL
+    Value: !Ref DocumentProcessingQueue
+
+  DLQUrl:
+    Description: SQS Dead Letter Queue URL
+    Value: !Ref DocumentProcessingDLQ
