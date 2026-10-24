@@ -1,0 +1,27 @@
+{
+  "name": "serverless-document-processing-workflow",
+  "version": "1.0.0",
+  "description": "Serverless Document Processing Workflow with AWS Lambda, S3, SQS, DynamoDB, Express.js, and React.",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "node backend/src/server.js",
+    "loadtest:low": "npx artillery run load-tests/low-load.yml",
+    "loadtest:medium": "npx artillery run load-tests/medium-load.yml",
+    "loadtest:high": "npx artillery run load-tests/high-load.yml",
+    "loadtest:all": "npx artillery run load-tests/load-test.yml"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "dynamodb",
+    "sqs",
+    "s3",
+    "express",
+    "react",
+    "document-processing"
+  ],
+  "author": "Ananya Karn",
+  "license": "MIT"
+}
