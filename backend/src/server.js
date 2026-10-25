@@ -4,12 +4,16 @@
 // Note: Default port is 5001 to avoid macOS AirPlay Receiver on 5000
 // ============================================================
 const app = require('./app');
+const { startWorker } = require('./services/sqsWorker');
 
 const PORT = parseInt(process.env.PORT, 10) || 5001;
 
 const server = app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📄 Health Check: http://localhost:${PORT}/api/health`);
+    if (process.env.SQS_QUEUE_URL) {
+        startWorker().catch(err => console.error('[SQS_WORKER] Startup error:', err.message));
+    }
 });
 
 server.on('error', (err) => {

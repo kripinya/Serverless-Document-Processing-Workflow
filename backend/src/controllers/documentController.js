@@ -13,6 +13,18 @@ const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'applicatio
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
+const formatDocument = (doc) => {
+  if (!doc) return null;
+  return {
+    ...doc,
+    id: doc.documentId,
+    originalName: doc.fileName,
+    size: doc.fileSize,
+    mimeType: doc.fileType,
+    createdAt: doc.uploadedAt
+  };
+};
+
 const documentController = {
   async upload(req, res, next) {
     try {
@@ -78,7 +90,7 @@ const documentController = {
       res.status(201).json({
         success: true,
         message: 'Document uploaded and queued for processing',
-        data: document
+        data: formatDocument(document)
       });
     } catch (error) {
       next(error);
@@ -92,7 +104,7 @@ const documentController = {
       res.json({
         success: true,
         count: documents.length,
-        data: documents
+        data: documents.map(formatDocument)
       });
     } catch (error) {
       next(error);
@@ -115,7 +127,7 @@ const documentController = {
 
       res.json({
         success: true,
-        data: { ...document, eventHistory: events }
+        data: { ...formatDocument(document), eventHistory: events }
       });
     } catch (error) {
       next(error);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
-import { UserPlus, AlertCircle, ArrowRight } from 'lucide-react';
+import { UserPlus, AlertCircle, ArrowRight, FileText } from 'lucide-react';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -17,60 +17,60 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const res = await authAPI.register({ name, email, password });
-      if (res.data?.token) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user || { name, email }));
+      const { token, user } = res.data?.data || {};
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user || { name, email }));
         navigate('/');
       } else {
         navigate('/login');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please check inputs.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please check inputs.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="glass-panel auth-card">
+    <div className="gcp-auth-canvas">
+      <div className="gcp-auth-card">
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          {/* DocFlow branded icon */}
           <div style={{
-            width: 52,
-            height: 52,
-            borderRadius: 14,
-            background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            marginBottom: 16,
-            boxShadow: '0 8px 20px rgba(6, 182, 212, 0.25)'
+            width: 48,
+            height: 48,
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'var(--df-navy)',
+            marginBottom: 14
           }}>
-            <UserPlus size={26} />
+            <FileText size={24} color="#FFFFFF" />
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>
-            Create Account
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 600, fontFamily: 'var(--font-sans)', color: 'var(--df-text-primary)' }}>
+            Create your DocFlow Account
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Register to start uploading and orchestrating documents
+          <p style={{ color: 'var(--df-text-secondary)', fontSize: '0.85rem', marginTop: 4 }}>
+            to manage Serverless Document Workflows & Storage
           </p>
         </div>
 
         {error && (
           <div style={{
-            background: 'var(--danger-bg)',
-            border: '1px solid var(--danger-border)',
-            color: 'var(--danger)',
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-md)',
+            background: 'var(--df-danger-light)',
+            border: '1px solid var(--df-danger-border)',
+            color: 'var(--df-danger)',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-xs)',
             fontSize: '0.85rem',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
             marginBottom: 20
           }}>
-            <AlertCircle size={18} />
+            <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
@@ -89,7 +89,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email address</label>
             <input
               type="email"
               required
@@ -115,24 +115,24 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '12px', fontSize: '0.95rem' }}
+            className="gcp-btn gcp-btn-primary"
+            style={{ width: '100%', height: 42, fontSize: '0.9rem' }}
             disabled={loading}
           >
             {loading ? 'Creating Account...' : 'Get Started'}
-            <ArrowRight size={16} />
+            <ArrowRight size={15} />
           </button>
         </form>
 
         <div style={{
           marginTop: 24,
-          paddingTop: 20,
-          borderTop: '1px solid var(--border-color)',
+          paddingTop: 18,
+          borderTop: '1px solid var(--df-border)',
           textAlign: 'center'
         }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--df-text-secondary)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+            <Link to="/login" style={{ color: 'var(--df-navy-mid)', fontWeight: 500 }}>
               Sign In
             </Link>
           </p>

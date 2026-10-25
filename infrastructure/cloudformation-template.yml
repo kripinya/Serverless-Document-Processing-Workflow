@@ -32,12 +32,12 @@ Resources:
       TableName: !Sub 'DocumentsTable-${EnvironmentName}'
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: documentId
           AttributeType: S
         - AttributeName: userId
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: documentId
           KeyType: HASH
       GlobalSecondaryIndexes:
         - IndexName: UserIdIndex
@@ -71,25 +71,38 @@ Resources:
       TableName: !Sub 'UsersTable-${EnvironmentName}'
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
         - AttributeName: email
           AttributeType: S
       KeySchema:
-        - AttributeName: email
+        - AttributeName: userId
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
 
   # ─── SQS Dead Letter Queue (DLQ) ───
   DocumentProcessingDLQ:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'doc-processing-dlq-${EnvironmentName}'
+      QueueName: !Sub 'doc-processing-dlq-${EnvironmentName}.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
       MessageRetentionPeriod: 1209600 # 14 days
 
   # ─── SQS Processing Queue with DLQ Redrive ───
   DocumentProcessingQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'doc-processing-queue-${EnvironmentName}'
-      VisibilityTimeout: 300
+      QueueName: !Sub 'doc-processing-queue-${EnvironmentName}.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      VisibilityTimeout: 120
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt DocumentProcessingDLQ.Arn
         maxReceiveCount: 3

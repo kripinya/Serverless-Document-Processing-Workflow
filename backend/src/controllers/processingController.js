@@ -19,14 +19,19 @@ const processingController = {
       res.json({
         success: true,
         data: {
+          id: document.documentId,
           documentId: document.documentId,
           fileName: document.fileName,
+          originalName: document.fileName,
+          size: document.fileSize,
+          mimeType: document.fileType,
           status: document.status,
           classification: document.classification,
           retryCount: document.retryCount,
           maxRetries: document.maxRetries,
           lastError: document.lastError,
           uploadedAt: document.uploadedAt,
+          createdAt: document.uploadedAt,
           processedAt: document.processedAt,
           eventCount: events.length,
           latestEvent: events[events.length - 1] || null
@@ -79,7 +84,8 @@ const processingController = {
           action: 'PROCESS_DOCUMENT',
           isRetry: true,
           retryCount: document.retryCount + 1
-        })
+        }),
+        MessageGroupId: document.documentId
       }).promise();
 
       res.json({
